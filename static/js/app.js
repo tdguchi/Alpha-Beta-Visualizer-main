@@ -2,6 +2,9 @@
 
 console.log("Alpha-Beta Visualizer loading...");
 
+// ===== GLOBAL VARIABLES =====
+let useAlphaBeta = true; // Control variable for algorithm mode
+
 // ===== NODE CLASS =====
 function Node() {
     this.pos = [0, 0];
@@ -65,12 +68,17 @@ Node.prototype.minimax = function() {
         var childValue = this.return
         if (this.max) {
             this.value = Math.max(this.value, childValue);
-            this.alpha = Math.max(this.alpha, childValue);
+            if (useAlphaBeta) {
+                this.alpha = Math.max(this.alpha, childValue);
+            }
         } else {
             this.value = Math.min(this.value, childValue);
-            this.beta = Math.min(this.beta, childValue);
+            if (useAlphaBeta) {
+                this.beta = Math.min(this.beta, childValue);
+            }
         }
-        if (this.beta <= this.alpha) {
+        // Only prune if alpha-beta is enabled
+        if (useAlphaBeta && this.beta <= this.alpha) {
             this.childSearchDone = true;
         }
         this.currentChildSearch += 1;
@@ -145,29 +153,32 @@ Node.prototype.draw = function(ctx) {
         ctx.fillStyle = "#0000ff"; // Blue for normal nodes
     }
 
-    var alphaText = "α: ";
-    if (this.alpha == Number.POSITIVE_INFINITY) {
-        alphaText += "Inf";
-    } else if (this.alpha == Number.NEGATIVE_INFINITY) {
-        alphaText += "-Inf";
-    } else if (this.alpha == null){
-        alphaText = "";
-    } else {
-        alphaText += this.alpha;
+    // Only show alpha and beta values when alpha-beta mode is enabled
+    if (useAlphaBeta) {
+        var alphaText = "α: ";
+        if (this.alpha == Number.POSITIVE_INFINITY) {
+            alphaText += "Inf";
+        } else if (this.alpha == Number.NEGATIVE_INFINITY) {
+            alphaText += "-Inf";
+        } else if (this.alpha == null){
+            alphaText = "";
+        } else {
+            alphaText += this.alpha;
+        }
+        ctx.fillText(alphaText, this.pos[0], this.pos[1] - Node.radius * 2.2);
+        
+        var betaText = "β: ";
+        if (this.beta == Number.POSITIVE_INFINITY) {
+            betaText += "Inf";
+        } else if (this.beta == Number.NEGATIVE_INFINITY) {
+            betaText += "-Inf";
+        } else if (this.beta == null){
+            betaText = "";
+        } else {
+            betaText += this.beta;
+        }
+        ctx.fillText(betaText, this.pos[0], this.pos[1] - Node.radius * 1.7);
     }
-    ctx.fillText(alphaText, this.pos[0], this.pos[1] - Node.radius * 2.2);
-    
-    var betaText = "β: ";
-    if (this.beta == Number.POSITIVE_INFINITY) {
-        betaText += "Inf";
-    } else if (this.beta == Number.NEGATIVE_INFINITY) {
-        betaText += "-Inf";
-    } else if (this.beta == null){
-        betaText = "";
-    } else {
-        betaText += this.beta;
-    }
-    ctx.fillText(betaText, this.pos[0], this.pos[1] - Node.radius * 1.7);
 };
 
 // Method to detect if a click position is within this node or its children
@@ -295,6 +306,9 @@ function NodeManager(canvasID) {
     document.getElementById("addChild").addEventListener("click", this.addChild.bind(this));
     document.getElementById("deleteNode").addEventListener("click", this.deleteNode.bind(this));
     document.getElementById("generateTree").addEventListener("click", this.generateRandomTree.bind(this));
+    
+    // Alpha-Beta toggle event listener
+    document.getElementById("alphaBetaToggle").addEventListener("change", this.toggleAlphaBeta.bind(this));
     
     // Make node_manager globally accessible for debugging
     window.testInlineEditor = () => {
@@ -875,6 +889,30 @@ NodeManager.prototype.draw = function() {
         this.ctx.stroke();
         this.ctx.restore();
     }
+};
+
+NodeManager.prototype.toggleAlphaBeta = function() {
+    const toggle = document.getElementById('alphaBetaToggle');
+    const label = document.getElementById('toggleLabel');
+    const description = document.getElementById('toggleDescription');
+    
+    useAlphaBeta = toggle.checked;
+    
+    if (useAlphaBeta) {
+        label.innerHTML = '<i class="fas fa-cut me-2"></i>Poda Alpha-Beta';
+        description.textContent = 'Algoritmo optimizado con poda alpha-beta';
+    } else {
+        label.innerHTML = '<i class="fas fa-tree me-2"></i>Minimax Puro';
+        description.textContent = 'Algoritmo minimax sin optimizaciones';
+    }
+    
+    // Reset the tree state when changing algorithm mode
+    this.reset();
+    
+    // Redraw to update the display immediately
+    this.draw();
+    
+    console.log(`Algorithm mode changed to: ${useAlphaBeta ? 'Alpha-Beta' : 'Pure Minimax'}`);
 };
 
 // ===== MAIN APPLICATION =====

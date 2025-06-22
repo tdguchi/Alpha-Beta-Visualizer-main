@@ -75,6 +75,20 @@
                         <h5 class="text-dark fw-bold mb-3">
                             <i class="fas fa-play-circle me-2"></i>Control del Algoritmo
                         </h5>
+                        
+                        <!-- Algorithm Mode Toggle -->
+                        <div class="mb-3 p-3 bg-white rounded border">
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" id="alphaBetaToggle" checked>
+                                <label class="form-check-label fw-bold" for="alphaBetaToggle" id="toggleLabel">
+                                    <i class="fas fa-cut me-2"></i>Poda Alpha-Beta
+                                </label>
+                            </div>
+                            <small class="text-muted d-block mt-1" id="toggleDescription">
+                                Algoritmo optimizado con poda alpha-beta
+                            </small>
+                        </div>
+                        
                         <div class="d-grid gap-2">
                             <button id="run" class="btn btn-dark btn-lg">
                                 <i class="fas fa-play me-2"></i>Ejecutar Completo
